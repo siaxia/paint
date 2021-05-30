@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>그림판</title>
+    <style>
+      #tools {
+        width: 800px;
+        height: 3em;
+        border: 1px solid #ddd;
+      }
+      #palette {
+        width: 40%;
+        height: 3em;
+        background-color: #ccc;
+        display: inline-block;
+        margin: 0;
+        vertical-align: top;
+      }
+      #colors {
+        width: 60%;
+        height: 3em;
+        text-align: center;
+        display: inline-block;
+      }
+      #color,
+      #color1,
+      #color2,
+      #colorInput,
+      #selectedColor {
+        cursor: pointer;
+      }
+
+      #color,
+      #color1,
+      #color2 {
+        width: 1em;
+        height: 1em;
+        display: inline-block;
+        margin: 0.2em 0.2em 0.1em 0.2em;
+      }
+      #inputDiv {
+        width: 20%;
+        height: 3em;
+        display: inline-block;
+        text-align: center;
+        vertical-align: top;
+      }
+      #colorInput {
+        height: 1.5em;
+      }
+      #lineWidthDiv {
+        width: 20%;
+        height: 3em;
+        display: inline-block;
+        margin: 0;
+        vertical-align: top;
+        text-align: center;
+      }
+      #lineWidth {
+        width: 80%;
+        text-align: center;
+        margin: 0 auto;
+        height: 1.5em;
+        border: 1px solid #ddd;
+      }
+      #selectedColor {
+        width: 6%;
+        height: 3em;
+        display: inline-block;
+        margin: 0;
+      }
+      #mouseOffset {
+        width: 30%;
+        height: 3em;
+        display: inline-block;
+        margin: 0;
+        vertical-align: top;
+        text-align: right;
+      }
+      #mouseX,
+      #mouseY {
+        margin: 0;
+      }
+      #myCanvas {
+        background-color: aliceblue;
+      }
+    </style>
+  </head>
+  <body onload="colors()">
+    <h2>그림판입니다. 그림을 그려보시와요:)</h2>
+    <hr />
+    <div id="tools">
+      <div id="palette"></div>
+      <div id="lineWidthDiv">
+        선굵기
+        <input id="lineWidth" onchange="lineWidthChange(event)" />
+      </div>
+      <div id="selectedColor"></div>
+      <div id="mouseOffset">
+        <p id="mouseX"></p>
+        <p id="mouseY"></p>
+      </div>
+    </div>
+    <canvas
+      id="myCanvas"
+      width="800"
+      height="800"
+      onmousemove="move(event)"
+      onmousedown="dragTrue(event)"
+      onmouseup="dragFalse(event)"
+      onmouseout="dragFalse(event)"
+    ></canvas>
+    <script>
+      const x = document.getElementById('mouseX');
+      const y = document.getElementById('mouseY');
+      const palette = document.getElementById('palette');
+      const selectedColor = document.getElementById('selectedColor');
+      const color1 = document.createElement('div');
+      const color2 = document.createElement('div');
+      let canvas, context;
+      const colors = () => {
+        canvas = document.getElementById('myCanvas');
+        context = canvas.getContext('2d');
+        context.lineWidth = 2;
+
+        const colors = document.createElement('div');
+        colors.id = 'colors';
+        palette.appendChild(colors);
+        for (let i = 0; i < 16; i++) {
+          const color = document.createElement('div');
+          const r = Math.floor(Math.random() * 256);
+          const g = Math.floor(Math.random() * 256);
+          const b = Math.floor(Math.random() * 256);
+          color.id = 'color';
+          color.style.background = `rgb(${r},${g},${b})`;
+          color.onclick = () => (context.strokeStyle = color.style.background);
+          colors.appendChild(color);
+        }
+        const inputDiv = document.createElement('div');
+        inputDiv.id = 'inputDiv';
+        palette.appendChild(inputDiv);
+        const colorInput = document.createElement('input');
+        colorInput.id = 'colorInput';
+        colorInput.type = 'color';
+        const inputChangeHandler = () => {
+          selectedColor.style.background = colorInput.value;
+          color2.style.background = color1.style.background;
+          color1.style.background = colorInput.value;
+          context.strokeStyle = colorInput.value;
+        };
+        colorInput.onchange = inputChangeHandler;
+        inputDiv.appendChild(colorInput);
+        selectedColor.style.background = colorInput.value;
+        selectedColor.onclick = () =>
+          (context.strokeStyle = selectedColor.style.background);
+
+        const makeColors = (div, name) => {
+          div.onclick = () => (context.strokeStyle = div.style.background);
+          div.id = name;
+          div.style.background = 'white';
+          inputDiv.appendChild(div);
+        };
+        makeColors(color1, 'color1');
+        makeColors(color2, 'color2');
+
+        const lineWidth = document.getElementById('lineWidth');
+        lineWidth.value = context.lineWidth;
+      };
+
+      let startX = 0,
+        startY = 0;
+      let drag = false;
+      const move = (e) => {
+        const curX = e.offsetX,
+          curY = e.offsetY;
+        x.innerText = 'x=' + curX;
+        y.innerText = 'y=' + curY;
+        if (!drag) {
+          context.beginPath();
+          context.moveTo(curX, curY);
+        } else {
+          context.lineTo(curX, curY);
+          context.stroke();
+        }
+      };
+      const dragTrue = (e) => {
+        drag = true;
+      };
+      const dragFalse = (e) => {
+        drag = false;
+      };
+      const lineWidthChange = (e) => {
+        context.lineWidth = e.target.value;
+      };
+    </script>
+  </body>
+</html>
